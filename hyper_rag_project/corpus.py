@@ -1,6 +1,5 @@
 """
 corpus.py
-─────────
 Curated neuroscience passages used to build the demo hypergraph.
 
 Each passage is labelled with:
@@ -21,8 +20,7 @@ from hypergraph import Passage, EvidenceType
 
 PASSAGES = [
 
-    # ── Cluster A: BDNF / synaptic plasticity / LTP ───────────────────────────
-
+    # Cluster A: BDNF / synaptic plasticity / LTP 
     Passage(
         id="p01",
         text=(
@@ -86,8 +84,7 @@ PASSAGES = [
         entities=["BDNF", "synaptic_plasticity", "cognitive_decline"],
     ),
 
-    # ── Cluster B: Dopamine / reward / decision-making ─────────────────────────
-
+    # Cluster B: Dopamine / reward / decision-making 
     Passage(
         id="p05",
         text=(
@@ -134,8 +131,7 @@ PASSAGES = [
         entities=["dopamine", "VTA", "reward_prediction_error", "decision_making"],
     ),
 
-    # ── Cluster C: Neuroinflammation / microglia / Alzheimer's ────────────────
-
+    # Cluster C: Neuroinflammation / microglia / Alzheimer's
     Passage(
         id="p08",
         text=(
@@ -182,8 +178,7 @@ PASSAGES = [
         entities=["microglia", "TREM2", "Alzheimers_disease", "cognitive_decline"],
     ),
 
-    # ── Cluster D: Sleep / hippocampal consolidation ──────────────────────────
-
+    # Cluster D: Sleep / hippocampal consolidation
     Passage(
         id="p11",
         text=(
@@ -230,8 +225,7 @@ PASSAGES = [
         entities=["sleep", "memory_consolidation"],
     ),
 
-    # ── Cluster E: BDNF contradictory signal ──────────────────────────────────
-
+    # Cluster E: BDNF contradictory signal
     Passage(
         id="p14",
         text=(
