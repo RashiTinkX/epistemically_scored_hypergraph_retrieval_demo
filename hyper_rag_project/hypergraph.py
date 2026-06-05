@@ -1,6 +1,5 @@
 """
 hypergraph.py
-─────────────
 Core data structures for an epistemically-scored knowledge hypergraph.
 
 A hyperedge connects N nodes (entities/concepts) and carries:
@@ -16,7 +15,7 @@ from enum import Enum
 import math
 
 
-# ─── Evidence-type taxonomy ──────────────────────────────────────────────────
+# Evidence-type taxonomy
 
 class EvidenceType(Enum):
     """Ordered by methodological strength (higher = stronger)."""
@@ -33,7 +32,7 @@ class EvidenceType(Enum):
         return (self.value - 1) / (max(e.value for e in EvidenceType) - 1)
 
 
-# ─── Epistemic Score ──────────────────────────────────────────────────────────
+# Epistemic Score
 
 @dataclass
 class EpistemicScore:
@@ -52,7 +51,7 @@ class EpistemicScore:
     replication_status:     float = 0.5   # how often reproduced
     recency:                float = 0.5   # age-adjusted relevance
 
-    # ── Dimension weights (tunable) ──
+    # Dimension weights (tunable) 
     WEIGHTS: dict = field(default_factory=lambda: {
         "source_authority":        0.10,
         "methodological_strength": 0.20,
@@ -134,7 +133,7 @@ class EpistemicScore:
         )
 
 
-# ─── Passage (document chunk) ─────────────────────────────────────────────────
+# Passage (document chunk)
 
 @dataclass
 class Passage:
@@ -183,7 +182,7 @@ class Hyperedge:
         return sorted(n.label for n in self.nodes)
 
 
-# ─── Hypergraph ───────────────────────────────────────────────────────────────
+# Hypergraph
 
 class KnowledgeHypergraph:
     """
