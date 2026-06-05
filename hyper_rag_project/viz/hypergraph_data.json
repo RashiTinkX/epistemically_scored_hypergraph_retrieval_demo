@@ -1,0 +1,694 @@
+{
+  "nodes": [
+    {
+      "id": "TrkB",
+      "label": "TrkB",
+      "node_type": "protein",
+      "degree": 1
+    },
+    {
+      "id": "BDNF",
+      "label": "BDNF",
+      "node_type": "protein",
+      "degree": 5
+    },
+    {
+      "id": "LTP",
+      "label": "LTP",
+      "node_type": "process",
+      "degree": 1
+    },
+    {
+      "id": "hippocampus",
+      "label": "hippocampus",
+      "node_type": "brain_region",
+      "degree": 5
+    },
+    {
+      "id": "spatial_memory",
+      "label": "spatial memory",
+      "node_type": "behaviour",
+      "degree": 2
+    },
+    {
+      "id": "aerobic_exercise",
+      "label": "aerobic exercise",
+      "node_type": "intervention",
+      "degree": 3
+    },
+    {
+      "id": "episodic_memory",
+      "label": "episodic memory",
+      "node_type": "behaviour",
+      "degree": 2
+    },
+    {
+      "id": "cognitive_decline",
+      "label": "cognitive decline",
+      "node_type": "behaviour",
+      "degree": 2
+    },
+    {
+      "id": "synaptic_plasticity",
+      "label": "synaptic plasticity",
+      "node_type": "process",
+      "degree": 1
+    },
+    {
+      "id": "decision_making",
+      "label": "decision making",
+      "node_type": "behaviour",
+      "degree": 3
+    },
+    {
+      "id": "VTA",
+      "label": "VTA",
+      "node_type": "brain_region",
+      "degree": 2
+    },
+    {
+      "id": "dopamine",
+      "label": "dopamine",
+      "node_type": "neurotransmitter",
+      "degree": 3
+    },
+    {
+      "id": "reward_prediction_error",
+      "label": "reward prediction error",
+      "node_type": "process",
+      "degree": 2
+    },
+    {
+      "id": "reinforcement_learning",
+      "label": "reinforcement learning",
+      "node_type": "process",
+      "degree": 1
+    },
+    {
+      "id": "striatum",
+      "label": "striatum",
+      "node_type": "brain_region",
+      "degree": 1
+    },
+    {
+      "id": "neuroinflammation",
+      "label": "neuroinflammation",
+      "node_type": "process",
+      "degree": 2
+    },
+    {
+      "id": "amyloid",
+      "label": "amyloid",
+      "node_type": "protein",
+      "degree": 2
+    },
+    {
+      "id": "Alzheimers_disease",
+      "label": "Alzheimers disease",
+      "node_type": "disease",
+      "degree": 3
+    },
+    {
+      "id": "microglia",
+      "label": "microglia",
+      "node_type": "cell_type",
+      "degree": 3
+    },
+    {
+      "id": "TREM2",
+      "label": "TREM2",
+      "node_type": "protein",
+      "degree": 2
+    },
+    {
+      "id": "sleep",
+      "label": "sleep",
+      "node_type": "intervention",
+      "degree": 3
+    },
+    {
+      "id": "sharp_wave_ripples",
+      "label": "sharp wave ripples",
+      "node_type": "process",
+      "degree": 1
+    },
+    {
+      "id": "memory_consolidation",
+      "label": "memory consolidation",
+      "node_type": "process",
+      "degree": 3
+    },
+    {
+      "id": "declarative_memory",
+      "label": "declarative memory",
+      "node_type": "behaviour",
+      "degree": 1
+    }
+  ],
+  "edges": [
+    {
+      "id": "e_p01",
+      "claim": "Brain-derived neurotrophic factor (BDNF) activates TrkB receptors at hippocampal synapses, triggering downstream MAPK/ERK signalling that enhances long-term potentiation (LTP).",
+      "source": "Nature Neuroscience",
+      "evidence_type": "CONTROLLED_EXPERIMENT",
+      "year": 2022,
+      "sample_n": 240,
+      "epistemic_quality": 0.8243,
+      "score": {
+        "source_authority": 1.0,
+        "methodological_strength": 0.8333,
+        "directness": 0.9,
+        "specificity": 0.85,
+        "sample_adequacy": 0.5951,
+        "independence": 0.931,
+        "consistency": 0.8,
+        "replication_status": 0.75,
+        "recency": 0.6
+      },
+      "weights": {
+        "source_authority": 0.1,
+        "methodological_strength": 0.2,
+        "directness": 0.15,
+        "specificity": 0.1,
+        "sample_adequacy": 0.1,
+        "independence": 0.1,
+        "consistency": 0.1,
+        "replication_status": 0.1,
+        "recency": 0.05
+      },
+      "node_ids": [
+        "TrkB",
+        "BDNF",
+        "LTP",
+        "hippocampus",
+        "spatial_memory"
+      ],
+      "passage_text": "Brain-derived neurotrophic factor (BDNF) activates TrkB receptors at hippocampal synapses, triggering downstream MAPK/ERK signalling that enhances long-term potentiation (LTP). In a randomised controlled experiment with 240 adult rats, bilateral infusion of a TrkB antagonist completely abolished LTP in CA1 and impaired spatial memory acquisition in the Morris water maze (p < 0.001)."
+    },
+    {
+      "id": "e_p02",
+      "claim": "A meta-analysis of 34 studies (total n = 8,412 participants) found that aerobic exercise consistently elevated serum BDNF levels by an average of 18 % (95 % CI: 14\u201322 %) and was associated with improved episodic memory scores across age groups.",
+      "source": "Neuroscience & Biobehavioral Reviews",
+      "evidence_type": "META_ANALYSIS",
+      "year": 2023,
+      "sample_n": 8412,
+      "epistemic_quality": 0.8775,
+      "score": {
+        "source_authority": 0.8,
+        "methodological_strength": 1.0,
+        "directness": 0.9,
+        "specificity": 0.85,
+        "sample_adequacy": 0.9812,
+        "independence": 0.894,
+        "consistency": 0.8,
+        "replication_status": 0.75,
+        "recency": 0.7
+      },
+      "weights": {
+        "source_authority": 0.1,
+        "methodological_strength": 0.2,
+        "directness": 0.15,
+        "specificity": 0.1,
+        "sample_adequacy": 0.1,
+        "independence": 0.1,
+        "consistency": 0.1,
+        "replication_status": 0.1,
+        "recency": 0.05
+      },
+      "node_ids": [
+        "aerobic_exercise",
+        "episodic_memory",
+        "hippocampus",
+        "BDNF"
+      ],
+      "passage_text": "A meta-analysis of 34 studies (total n = 8,412 participants) found that aerobic exercise consistently elevated serum BDNF levels by an average of 18 % (95 % CI: 14\u201322 %) and was associated with improved episodic memory scores across age groups. Effect sizes were larger in studies lasting \u2265 12 weeks."
+    },
+    {
+      "id": "e_p03",
+      "claim": "A cross-sectional survey of 120 elderly volunteers found a weak positive correlation (r = 0.21, p = 0.04) between self-reported physical activity and plasma BDNF.",
+      "source": "Frontiers in Aging Neuroscience",
+      "evidence_type": "CROSS_SECTIONAL",
+      "year": 2019,
+      "sample_n": 120,
+      "epistemic_quality": 0.5808,
+      "score": {
+        "source_authority": 0.6,
+        "methodological_strength": 0.3333,
+        "directness": 0.6,
+        "specificity": 0.85,
+        "sample_adequacy": 0.5198,
+        "independence": 0.872,
+        "consistency": 0.8,
+        "replication_status": 0.45,
+        "recency": 0.3
+      },
+      "weights": {
+        "source_authority": 0.1,
+        "methodological_strength": 0.2,
+        "directness": 0.15,
+        "specificity": 0.1,
+        "sample_adequacy": 0.1,
+        "independence": 0.1,
+        "consistency": 0.1,
+        "replication_status": 0.1,
+        "recency": 0.05
+      },
+      "node_ids": [
+        "aerobic_exercise",
+        "hippocampus",
+        "BDNF"
+      ],
+      "passage_text": "A cross-sectional survey of 120 elderly volunteers found a weak positive correlation (r = 0.21, p = 0.04) between self-reported physical activity and plasma BDNF. The study relied on questionnaire data and did not measure LTP or hippocampal volume directly."
+    },
+    {
+      "id": "e_p04",
+      "claim": "Editorial commentary: It is widely believed that BDNF plays a central role in synaptic plasticity and memory.",
+      "source": "Trends in Neurosciences (editorial)",
+      "evidence_type": "SECONDARY_COMMENTARY",
+      "year": 2021,
+      "sample_n": null,
+      "epistemic_quality": 0.3936,
+      "score": {
+        "source_authority": 0.3,
+        "methodological_strength": 0.0,
+        "directness": 0.6,
+        "specificity": 0.55,
+        "sample_adequacy": 0.0,
+        "independence": 0.936,
+        "consistency": 0.55,
+        "replication_status": 0.45,
+        "recency": 0.5
+      },
+      "weights": {
+        "source_authority": 0.1,
+        "methodological_strength": 0.2,
+        "directness": 0.15,
+        "specificity": 0.1,
+        "sample_adequacy": 0.1,
+        "independence": 0.1,
+        "consistency": 0.1,
+        "replication_status": 0.1,
+        "recency": 0.05
+      },
+      "node_ids": [
+        "cognitive_decline",
+        "synaptic_plasticity",
+        "BDNF"
+      ],
+      "passage_text": "Editorial commentary: It is widely believed that BDNF plays a central role in synaptic plasticity and memory. Several researchers have proposed that targeting BDNF pathways could be therapeutic for cognitive decline, though clinical translation remains challenging."
+    },
+    {
+      "id": "e_p05",
+      "claim": "Midbrain dopamine neurons in the ventral tegmental area (VTA) encode reward prediction errors (RPE): they fire above baseline when reward exceeds expectation and are suppressed when expected reward is omitted.",
+      "source": "Science",
+      "evidence_type": "CONTROLLED_EXPERIMENT",
+      "year": 2021,
+      "sample_n": 18,
+      "epistemic_quality": 0.7622,
+      "score": {
+        "source_authority": 1.0,
+        "methodological_strength": 0.8333,
+        "directness": 0.9,
+        "specificity": 0.55,
+        "sample_adequacy": 0.3138,
+        "independence": 0.942,
+        "consistency": 0.8,
+        "replication_status": 0.75,
+        "recency": 0.5
+      },
+      "weights": {
+        "source_authority": 0.1,
+        "methodological_strength": 0.2,
+        "directness": 0.15,
+        "specificity": 0.1,
+        "sample_adequacy": 0.1,
+        "independence": 0.1,
+        "consistency": 0.1,
+        "replication_status": 0.1,
+        "recency": 0.05
+      },
+      "node_ids": [
+        "decision_making",
+        "VTA",
+        "dopamine",
+        "reward_prediction_error"
+      ],
+      "passage_text": "Midbrain dopamine neurons in the ventral tegmental area (VTA) encode reward prediction errors (RPE): they fire above baseline when reward exceeds expectation and are suppressed when expected reward is omitted. Single-unit recordings in 18 macaques across 6,000 trials replicated the RPE signal with high fidelity (R\u00b2 = 0.91)."
+    },
+    {
+      "id": "e_p06",
+      "claim": "Longitudinal fMRI study of 95 healthy adults over 18 months showed that striatal dopamine release (indexed via [11C]raclopride PET) predicted individual differences in reinforcement learning rate (\u03b2 = 0.43, p < 0.001) and real-world financial decision quality.",
+      "source": "Neuron",
+      "evidence_type": "LONGITUDINAL",
+      "year": 2022,
+      "sample_n": 95,
+      "epistemic_quality": 0.6756,
+      "score": {
+        "source_authority": 1.0,
+        "methodological_strength": 0.5,
+        "directness": 0.6,
+        "specificity": 0.85,
+        "sample_adequacy": 0.4944,
+        "independence": 0.962,
+        "consistency": 0.8,
+        "replication_status": 0.45,
+        "recency": 0.6
+      },
+      "weights": {
+        "source_authority": 0.1,
+        "methodological_strength": 0.2,
+        "directness": 0.15,
+        "specificity": 0.1,
+        "sample_adequacy": 0.1,
+        "independence": 0.1,
+        "consistency": 0.1,
+        "replication_status": 0.1,
+        "recency": 0.05
+      },
+      "node_ids": [
+        "reinforcement_learning",
+        "decision_making",
+        "dopamine",
+        "striatum"
+      ],
+      "passage_text": "Longitudinal fMRI study of 95 healthy adults over 18 months showed that striatal dopamine release (indexed via [11C]raclopride PET) predicted individual differences in reinforcement learning rate (\u03b2 = 0.43, p < 0.001) and real-world financial decision quality."
+    },
+    {
+      "id": "e_p07",
+      "claim": "A case report describes a patient with a focal VTA lesion who showed complete insensitivity to monetary rewards on a gambling task.",
+      "source": "Neuropsychologia",
+      "evidence_type": "CASE_REPORT",
+      "year": 2020,
+      "sample_n": 1,
+      "epistemic_quality": 0.4775,
+      "score": {
+        "source_authority": 0.6,
+        "methodological_strength": 0.1667,
+        "directness": 0.6,
+        "specificity": 0.55,
+        "sample_adequacy": 0.0,
+        "independence": 0.942,
+        "consistency": 0.8,
+        "replication_status": 0.45,
+        "recency": 0.4
+      },
+      "weights": {
+        "source_authority": 0.1,
+        "methodological_strength": 0.2,
+        "directness": 0.15,
+        "specificity": 0.1,
+        "sample_adequacy": 0.1,
+        "independence": 0.1,
+        "consistency": 0.1,
+        "replication_status": 0.1,
+        "recency": 0.05
+      },
+      "node_ids": [
+        "decision_making",
+        "VTA",
+        "dopamine",
+        "reward_prediction_error"
+      ],
+      "passage_text": "A case report describes a patient with a focal VTA lesion who showed complete insensitivity to monetary rewards on a gambling task. Neuropsychological testing confirmed intact general cognition. The authors conclude dopamine is necessary for reward-based choice."
+    },
+    {
+      "id": "e_p08",
+      "claim": "Single-cell RNA sequencing of post-mortem human cortex (n = 48 donors, 24 Alzheimer's / 24 controls) identified a disease-associated microglia (DAM) subtype upregulating TREM2 and downregulating homeostatic genes.",
+      "source": "Cell",
+      "evidence_type": "OBSERVATIONAL",
+      "year": 2023,
+      "sample_n": 48,
+      "epistemic_quality": 0.72,
+      "score": {
+        "source_authority": 1.0,
+        "methodological_strength": 0.6667,
+        "directness": 0.9,
+        "specificity": 0.55,
+        "sample_adequacy": 0.4203,
+        "independence": 0.946,
+        "consistency": 0.8,
+        "replication_status": 0.45,
+        "recency": 0.7
+      },
+      "weights": {
+        "source_authority": 0.1,
+        "methodological_strength": 0.2,
+        "directness": 0.15,
+        "specificity": 0.1,
+        "sample_adequacy": 0.1,
+        "independence": 0.1,
+        "consistency": 0.1,
+        "replication_status": 0.1,
+        "recency": 0.05
+      },
+      "node_ids": [
+        "neuroinflammation",
+        "amyloid",
+        "Alzheimers_disease",
+        "microglia",
+        "TREM2"
+      ],
+      "passage_text": "Single-cell RNA sequencing of post-mortem human cortex (n = 48 donors, 24 Alzheimer's / 24 controls) identified a disease-associated microglia (DAM) subtype upregulating TREM2 and downregulating homeostatic genes. DAM density correlated with amyloid plaque load (Spearman \u03c1 = 0.74)."
+    },
+    {
+      "id": "e_p09",
+      "claim": "In a transgenic mouse model of Alzheimer's disease (5xFAD, n = 60 mice), pharmacological depletion of microglia via CSF1R inhibitor PLX5622 reduced amyloid plaque burden by 35 % at 6 months but did not improve spatial memory in the Barnes maze.",
+      "source": "Journal of Neuroinflammation",
+      "evidence_type": "CONTROLLED_EXPERIMENT",
+      "year": 2022,
+      "sample_n": 60,
+      "epistemic_quality": 0.7707,
+      "score": {
+        "source_authority": 0.6,
+        "methodological_strength": 0.8333,
+        "directness": 0.9,
+        "specificity": 0.85,
+        "sample_adequacy": 0.4445,
+        "independence": 0.946,
+        "consistency": 0.8,
+        "replication_status": 0.75,
+        "recency": 0.6
+      },
+      "weights": {
+        "source_authority": 0.1,
+        "methodological_strength": 0.2,
+        "directness": 0.15,
+        "specificity": 0.1,
+        "sample_adequacy": 0.1,
+        "independence": 0.1,
+        "consistency": 0.1,
+        "replication_status": 0.1,
+        "recency": 0.05
+      },
+      "node_ids": [
+        "neuroinflammation",
+        "amyloid",
+        "Alzheimers_disease",
+        "spatial_memory",
+        "microglia"
+      ],
+      "passage_text": "In a transgenic mouse model of Alzheimer's disease (5xFAD, n = 60 mice), pharmacological depletion of microglia via CSF1R inhibitor PLX5622 reduced amyloid plaque burden by 35 % at 6 months but did not improve spatial memory in the Barnes maze. This suggests microglial removal has plaque-clearing but not cognitive benefits."
+    },
+    {
+      "id": "e_p10",
+      "claim": "A secondary analysis of data from the ADNI cohort (n = 312) found that elevated CSF levels of sTREM2, a microglial activation marker, were associated with slower cognitive decline over 3 years in early-stage Alzheimer's, suggesting a neuroprotective phase of microglial activation.",
+      "source": "Alzheimer's & Dementia",
+      "evidence_type": "OBSERVATIONAL",
+      "year": 2023,
+      "sample_n": 312,
+      "epistemic_quality": 0.7499,
+      "score": {
+        "source_authority": 0.8,
+        "methodological_strength": 0.6667,
+        "directness": 0.9,
+        "specificity": 0.85,
+        "sample_adequacy": 0.6235,
+        "independence": 0.942,
+        "consistency": 0.8,
+        "replication_status": 0.45,
+        "recency": 0.7
+      },
+      "weights": {
+        "source_authority": 0.1,
+        "methodological_strength": 0.2,
+        "directness": 0.15,
+        "specificity": 0.1,
+        "sample_adequacy": 0.1,
+        "independence": 0.1,
+        "consistency": 0.1,
+        "replication_status": 0.1,
+        "recency": 0.05
+      },
+      "node_ids": [
+        "microglia",
+        "TREM2",
+        "cognitive_decline",
+        "Alzheimers_disease"
+      ],
+      "passage_text": "A secondary analysis of data from the ADNI cohort (n = 312) found that elevated CSF levels of sTREM2, a microglial activation marker, were associated with slower cognitive decline over 3 years in early-stage Alzheimer's, suggesting a neuroprotective phase of microglial activation."
+    },
+    {
+      "id": "e_p11",
+      "claim": "Sharp-wave ripples (SWRs) recorded from hippocampal CA1 in sleeping rats (n = 30) co-occurred with cortical slow oscillations and spindles in 78 % of events, consistent with the active systems consolidation hypothesis.",
+      "source": "Nature",
+      "evidence_type": "CONTROLLED_EXPERIMENT",
+      "year": 2023,
+      "sample_n": 30,
+      "epistemic_quality": 0.7759,
+      "score": {
+        "source_authority": 1.0,
+        "methodological_strength": 0.8333,
+        "directness": 0.9,
+        "specificity": 0.55,
+        "sample_adequacy": 0.3693,
+        "independence": 0.923,
+        "consistency": 0.8,
+        "replication_status": 0.75,
+        "recency": 0.7
+      },
+      "weights": {
+        "source_authority": 0.1,
+        "methodological_strength": 0.2,
+        "directness": 0.15,
+        "specificity": 0.1,
+        "sample_adequacy": 0.1,
+        "independence": 0.1,
+        "consistency": 0.1,
+        "replication_status": 0.1,
+        "recency": 0.05
+      },
+      "node_ids": [
+        "sleep",
+        "hippocampus",
+        "sharp_wave_ripples",
+        "memory_consolidation"
+      ],
+      "passage_text": "Sharp-wave ripples (SWRs) recorded from hippocampal CA1 in sleeping rats (n = 30) co-occurred with cortical slow oscillations and spindles in 78 % of events, consistent with the active systems consolidation hypothesis. Optogenetic disruption of SWRs during slow-wave sleep impaired novel object recognition 24 h later (p < 0.001)."
+    },
+    {
+      "id": "e_p12",
+      "claim": "Polysomnographic study of 200 university students found that total slow-wave sleep duration positively predicted next-day declarative memory retention (r = 0.38, p < 0.001), while REM sleep predicted procedural memory.",
+      "source": "Sleep",
+      "evidence_type": "OBSERVATIONAL",
+      "year": 2022,
+      "sample_n": 385,
+      "epistemic_quality": 0.7453,
+      "score": {
+        "source_authority": 0.8,
+        "methodological_strength": 0.6667,
+        "directness": 0.9,
+        "specificity": 0.85,
+        "sample_adequacy": 0.6464,
+        "independence": 0.923,
+        "consistency": 0.8,
+        "replication_status": 0.45,
+        "recency": 0.6
+      },
+      "weights": {
+        "source_authority": 0.1,
+        "methodological_strength": 0.2,
+        "directness": 0.15,
+        "specificity": 0.1,
+        "sample_adequacy": 0.1,
+        "independence": 0.1,
+        "consistency": 0.1,
+        "replication_status": 0.1,
+        "recency": 0.05
+      },
+      "node_ids": [
+        "sleep",
+        "hippocampus",
+        "declarative_memory",
+        "memory_consolidation"
+      ],
+      "passage_text": "Polysomnographic study of 200 university students found that total slow-wave sleep duration positively predicted next-day declarative memory retention (r = 0.38, p < 0.001), while REM sleep predicted procedural memory. Both findings were replicated in an independent cohort of 185 participants."
+    },
+    {
+      "id": "e_p13",
+      "claim": "It has long been thought that sleep is important for memory.",
+      "source": "Scientific American (blog post)",
+      "evidence_type": "SECONDARY_COMMENTARY",
+      "year": 2020,
+      "sample_n": null,
+      "epistemic_quality": 0.3873,
+      "score": {
+        "source_authority": 0.3,
+        "methodological_strength": 0.0,
+        "directness": 0.6,
+        "specificity": 0.55,
+        "sample_adequacy": 0.0,
+        "independence": 0.923,
+        "consistency": 0.55,
+        "replication_status": 0.45,
+        "recency": 0.4
+      },
+      "weights": {
+        "source_authority": 0.1,
+        "methodological_strength": 0.2,
+        "directness": 0.15,
+        "specificity": 0.1,
+        "sample_adequacy": 0.1,
+        "independence": 0.1,
+        "consistency": 0.1,
+        "replication_status": 0.1,
+        "recency": 0.05
+      },
+      "node_ids": [
+        "sleep",
+        "memory_consolidation"
+      ],
+      "passage_text": "It has long been thought that sleep is important for memory. Popular science accounts often claim that a full 8 hours is necessary for optimal brain function, though the scientific evidence for a specific duration threshold is less clear than commonly portrayed."
+    },
+    {
+      "id": "e_p14",
+      "claim": "A pre-registered randomised trial (n = 180 older adults, 12-week aerobic training vs.",
+      "source": "JAMA Neurology",
+      "evidence_type": "CONTROLLED_EXPERIMENT",
+      "year": 2024,
+      "sample_n": 180,
+      "epistemic_quality": 0.784,
+      "score": {
+        "source_authority": 1.0,
+        "methodological_strength": 0.8333,
+        "directness": 0.9,
+        "specificity": 0.85,
+        "sample_adequacy": 0.5638,
+        "independence": 0.91,
+        "consistency": 0.35,
+        "replication_status": 0.75,
+        "recency": 0.8
+      },
+      "weights": {
+        "source_authority": 0.1,
+        "methodological_strength": 0.2,
+        "directness": 0.15,
+        "specificity": 0.1,
+        "sample_adequacy": 0.1,
+        "independence": 0.1,
+        "consistency": 0.1,
+        "replication_status": 0.1,
+        "recency": 0.05
+      },
+      "node_ids": [
+        "aerobic_exercise",
+        "episodic_memory",
+        "BDNF"
+      ],
+      "passage_text": "A pre-registered randomised trial (n = 180 older adults, 12-week aerobic training vs. stretching control) found no significant difference in serum BDNF between groups (p = 0.41) and no correlation between BDNF change and memory performance. Authors note possible ceiling effects in healthy older adults."
+    }
+  ],
+  "meta": {
+    "nodes": 24,
+    "edges": 14,
+    "avg_epistemic_quality": 0.68,
+    "evidence_types": [
+      "CASE_REPORT",
+      "CONTROLLED_EXPERIMENT",
+      "CROSS_SECTIONAL",
+      "LONGITUDINAL",
+      "META_ANALYSIS",
+      "OBSERVATIONAL",
+      "SECONDARY_COMMENTARY"
+    ]
+  }
+}

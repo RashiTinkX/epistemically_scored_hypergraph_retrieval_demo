@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hyper-RAG · Epistemic Knowledge Hypergraph</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:         #0a0e17;
+    --bg2:        #111827;
+    --bg3:        #1a2235;
+    --border:     rgba(255,255,255,0.08);
+    --border2:    rgba(255,255,255,0.15);
+    --text:       #e2e8f0;
+    --text2:      #94a3b8;
+    --text3:      #475569;
+    --accent:     #38bdf8;
+    --accent2:    #0ea5e9;
+    --green:      #4ade80;
+    --amber:      #fbbf24;
+    --red:        #f87171;
+    --purple:     #a78bfa;
+
+    /* evidence type colours */
+    --meta:       #4ade80;
+    --rct:        #38bdf8;
+    --obs:        #a78bfa;
+    --long:       #fb923c;
+    --cross:      #fbbf24;
+    --case:       #f87171;
+    --sec:        #64748b;
+  }
+
+  html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; }
+
+  /* ── Layout ── */
+  #app { display: flex; height: 100vh; }
+  #sidebar-left  { width: 220px; flex-shrink: 0; display: flex; flex-direction: column; border-right: 1px solid var(--border); background: var(--bg2); z-index: 10; }
+  #canvas-wrap   { flex: 1; position: relative; overflow: hidden; }
+  #sidebar-right { width: 360px; flex-shrink: 0; display: flex; flex-direction: column; border-left: 1px solid var(--border); background: var(--bg2); overflow-y: auto; z-index: 10; transition: width 0.25s ease; }
+  #sidebar-right.collapsed { width: 0; overflow: hidden; }
+
+  /* ── Left sidebar ── */
+  .sb-header { padding: 18px 16px 12px; border-bottom: 1px solid var(--border); }
+  .sb-header h1 { font-size: 13px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--accent); }
+  .sb-header p  { font-size: 11px; color: var(--text2); margin-top: 3px; }
+
+  .sb-section { padding: 12px 14px; border-bottom: 1px solid var(--border); }
+  .sb-label   { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text3); margin-bottom: 8px; }
+
+  /* alpha slider */
+  .slider-row { display: flex; align-items: center; gap: 8px; }
+  .slider-row label { font-size: 11px; color: var(--text2); min-width: 14px; }
+  input[type=range] { flex: 1; accent-color: var(--accent); height: 3px; }
+  .slider-val { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--accent); min-width: 28px; text-align: right; }
+
+  /* search */
+  .search-box { width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; padding: 7px 10px; font-size: 12px; color: var(--text); font-family: 'DM Sans', sans-serif; outline: none; }
+  .search-box:focus { border-color: var(--accent2); }
+
+  /* legend */
+  .legend-item { display: flex; align-items: center; gap: 7px; margin-bottom: 5px; cursor: pointer; border-radius: 4px; padding: 2px 4px; transition: background 0.1s; }
+  .legend-item:hover { background: var(--bg3); }
+  .legend-item.muted { opacity: 0.35; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+  .legend-item span { font-size: 11px; color: var(--text2); }
+
+  /* node type legend */
+  .ntype-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .ntype-item { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+  .ntype-item span { font-size: 11px; color: var(--text2); }
+
+  /* stats chips */
+  .chips { display: flex; flex-wrap: wrap; gap: 5px; }
+  .chip { background: var(--bg3); border: 1px solid var(--border); border-radius: 4px; padding: 3px 7px; font-size: 10px; font-family: 'DM Mono', monospace; color: var(--text2); }
+  .chip span { color: var(--text); font-weight: 500; }
+
+  /* controls */
+  .ctrl-btn { width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: 5px; padding: 6px 10px; font-size: 11px; color: var(--text2); cursor: pointer; text-align: left; font-family: 'DM Sans', sans-serif; margin-bottom: 5px; transition: border-color 0.15s, color 0.15s; }
+  .ctrl-btn:hover { border-color: var(--border2); color: var(--text); }
+
+  /* ── Canvas ── */
+  #canvas-wrap svg { width: 100%; height: 100%; }
+
+  /* graph elements */
+  .node-entity circle { cursor: pointer; transition: r 0.15s; }
+  .node-entity text { font-family: 'DM Sans', sans-serif; font-size: 10px; fill: var(--text2); pointer-events: none; text-anchor: middle; }
+  .node-entity:hover circle { filter: brightness(1.3); }
+
+  .hedge-hull { cursor: pointer; }
+  .hedge-hull:hover { filter: brightness(1.25); }
+
+  .edge-label { font-family: 'DM Mono', monospace; font-size: 9px; fill: var(--text3); pointer-events: none; text-anchor: middle; }
+
+  /* ── Right panel ── */
+  .panel-header { padding: 18px 20px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+  .panel-header h2 { font-size: 13px; font-weight: 500; color: var(--text); line-height: 1.5; flex: 1; }
+  .close-btn { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 18px; padding: 0 0 0 6px; line-height: 1; }
+  .close-btn:hover { color: var(--text); }
+
+  .panel-section { padding: 14px 20px; border-bottom: 1px solid var(--border); }
+  .panel-section-title { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text3); margin-bottom: 10px; }
+
+  .meta-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .meta-key { font-size: 12px; color: var(--text2); }
+  .meta-val { font-size: 12px; font-weight: 500; color: var(--text); font-family: 'DM Mono', monospace; }
+
+  .etype-badge { display: inline-block; padding: 2px 9px; border-radius: 3px; font-size: 11px; font-weight: 500; }
+
+  /* aggregate score ring */
+  .score-ring-wrap { display: flex; align-items: center; gap: 16px; margin-bottom: 4px; }
+  .score-ring-num  { font-family: 'DM Mono', monospace; font-size: 32px; font-weight: 300; }
+  .score-ring-sub  { font-size: 11px; color: var(--text2); }
+
+  /* dimension bars */
+  .dim-row { margin-bottom: 7px; }
+  .dim-header { display: flex; justify-content: space-between; margin-bottom: 3px; }
+  .dim-name { font-size: 11px; color: var(--text2); }
+  .dim-num  { font-family: 'DM Mono', monospace; font-size: 11px; }
+  .dim-bar-track { height: 4px; background: var(--bg3); border-radius: 2px; }
+  .dim-bar-fill  { height: 4px; border-radius: 2px; transition: width 0.4s ease; }
+
+  /* passage text */
+  .passage-text { font-size: 12px; line-height: 1.7; color: var(--text2); background: var(--bg3); border-left: 2px solid var(--border2); padding: 10px 12px; border-radius: 0 5px 5px 0; }
+
+  /* node list */
+  .node-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+  .node-chip  { padding: 3px 8px; border-radius: 3px; font-size: 11px; border: 1px solid var(--border); color: var(--text2); }
+
+  /* empty state */
+  #empty-state { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center; pointer-events: none; }
+  #empty-state h3 { font-size: 14px; font-weight: 400; color: var(--text3); margin-bottom: 4px; }
+  #empty-state p  { font-size: 12px; color: var(--text3); }
+
+  /* tooltip */
+  #tooltip { position: fixed; background: var(--bg2); border: 1px solid var(--border2); border-radius: 6px; padding: 8px 11px; font-size: 11px; color: var(--text); pointer-events: none; z-index: 100; max-width: 220px; display: none; }
+
+  /* quality gate line on bar chart */
+  .gate-line { stroke: var(--red); stroke-dasharray: 3 3; stroke-width: 1; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ── LEFT SIDEBAR ── -->
+  <div id="sidebar-left">
+    <div class="sb-header">
+      <h1>Hyper-RAG</h1>
+      <p>Epistemic knowledge graph</p>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-label">Retrieval α</div>
+      <div class="slider-row">
+        <label>rel</label>
+        <input type="range" id="alpha-slider" min="0" max="1" step="0.05" value="0.6">
+        <label>ep</label>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:4px;">
+        <span style="font-size:10px;color:var(--text3)">α = <span id="alpha-val" style="color:var(--accent);font-family:'DM Mono',monospace">0.60</span></span>
+        <span style="font-size:10px;color:var(--text3)">ep gate: <span id="gate-val" style="color:var(--red);font-family:'DM Mono',monospace">off</span></span>
+      </div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-label">Min epistemic quality</div>
+      <div class="slider-row">
+        <label>0</label>
+        <input type="range" id="gate-slider" min="0" max="0.9" step="0.05" value="0">
+        <label>0.9</label>
+      </div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-label">Filter by type</div>
+      <div id="etype-legend"></div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-label">Node types</div>
+      <div id="ntype-legend"></div>
+    </div>
+
+    <div class="sb-section" style="flex:1;">
+      <div class="sb-label">Stats</div>
+      <div class="chips" id="stats-chips"></div>
+    </div>
+
+    <div class="sb-section">
+      <button class="ctrl-btn" id="btn-reset">↺ Reset view</button>
+      <button class="ctrl-btn" id="btn-reheat">⚡ Reheat layout</button>
+    </div>
+  </div>
+
+  <!-- ── CANVAS ── -->
+  <div id="canvas-wrap">
+    <div id="empty-state">
+      <h3>Click a hyperedge to inspect it</h3>
+      <p>Squares = hyperedges · Circles = entities</p>
+    </div>
+    <svg id="graph-svg"></svg>
+  </div>
+
+  <!-- ── RIGHT PANEL ── -->
+  <div id="sidebar-right" class="collapsed">
+    <div class="panel-header">
+      <h2 id="panel-claim">—</h2>
+      <button class="close-btn" id="close-panel">×</button>
+    </div>
+    <div class="panel-section">
+      <div class="panel-section-title">Evidence metadata</div>
+      <div class="meta-row"><span class="meta-key">Source</span><span class="meta-val" id="p-source">—</span></div>
+      <div class="meta-row"><span class="meta-key">Evidence type</span><span id="p-etype">—</span></div>
+      <div class="meta-row"><span class="meta-key">Year</span><span class="meta-val" id="p-year">—</span></div>
+      <div class="meta-row"><span class="meta-key">Sample n</span><span class="meta-val" id="p-n">—</span></div>
+    </div>
+    <div class="panel-section">
+      <div class="panel-section-title">Epistemic quality</div>
+      <div class="score-ring-wrap">
+        <span class="score-ring-num" id="p-aggregate">—</span>
+        <div>
+          <div id="p-quality-label" style="font-size:12px;font-weight:500;margin-bottom:2px;">—</div>
+          <div class="score-ring-sub">aggregate score / 1.0</div>
+        </div>
+      </div>
+      <div id="dim-bars"></div>
+    </div>
+    <div class="panel-section">
+      <div class="panel-section-title">Connected entities</div>
+      <div class="node-chips" id="p-nodes"></div>
+    </div>
+    <div class="panel-section">
+      <div class="panel-section-title">Passage text</div>
+      <div class="passage-text" id="p-text">—</div>
+    </div>
+  </div>
+</div>
+
+<div id="tooltip"></div>
+
+<script>
+// ─── Data ──────────────────────────────────────────────────────────────────
+const DATA = {"nodes":[{"id":"TrkB","label":"TrkB","node_type":"protein","degree":1},{"id":"hippocampus","label":"hippocampus","node_type":"brain_region","degree":5},{"id":"BDNF","label":"BDNF","node_type":"protein","degree":5},{"id":"LTP","label":"LTP","node_type":"process","degree":1},{"id":"spatial_memory","label":"spatial memory","node_type":"behaviour","degree":2},{"id":"episodic_memory","label":"episodic memory","node_type":"behaviour","degree":2},{"id":"aerobic_exercise","label":"aerobic exercise","node_type":"intervention","degree":3},{"id":"synaptic_plasticity","label":"synaptic plasticity","node_type":"process","degree":1},{"id":"cognitive_decline","label":"cognitive decline","node_type":"behaviour","degree":2},{"id":"decision_making","label":"decision making","node_type":"behaviour","degree":3},{"id":"reward_prediction_error","label":"reward prediction error","node_type":"process","degree":2},{"id":"VTA","label":"VTA","node_type":"brain_region","degree":2},{"id":"dopamine","label":"dopamine","node_type":"neurotransmitter","degree":3},{"id":"striatum","label":"striatum","node_type":"brain_region","degree":1},{"id":"reinforcement_learning","label":"reinforcement learning","node_type":"process","degree":1},{"id":"TREM2","label":"TREM2","node_type":"protein","degree":2},{"id":"amyloid","label":"amyloid","node_type":"protein","degree":2},{"id":"neuroinflammation","label":"neuroinflammation","node_type":"process","degree":2},{"id":"microglia","label":"microglia","node_type":"cell_type","degree":3},{"id":"Alzheimers_disease","label":"Alzheimers disease","node_type":"disease","degree":3},{"id":"sleep","label":"sleep","node_type":"intervention","degree":3},{"id":"sharp_wave_ripples","label":"sharp wave ripples","node_type":"process","degree":1},{"id":"memory_consolidation","label":"memory consolidation","node_type":"process","degree":3},{"id":"declarative_memory","label":"declarative memory","node_type":"behaviour","degree":1}],"edges":[{"id":"e_p01","claim":"Brain-derived neurotrophic factor (BDNF) activates TrkB receptors at hippocampal synapses, triggering downstream MAPK/ERK signalling that enhances long-term potentiation (LTP).","source":"Nature Neuroscience","evidence_type":"CONTROLLED_EXPERIMENT","year":2022,"sample_n":240,"epistemic_quality":0.8243,"score":{"source_authority":1.0,"methodological_strength":0.8333,"directness":0.9,"specificity":0.85,"sample_adequacy":0.5951,"independence":0.931,"consistency":0.8,"replication_status":0.75,"recency":0.6},"weights":{"source_authority":0.1,"methodological_strength":0.2,"directness":0.15,"specificity":0.1,"sample_adequacy":0.1,"independence":0.1,"consistency":0.1,"replication_status":0.1,"recency":0.05},"node_ids":["TrkB","hippocampus","BDNF","LTP","spatial_memory"],"passage_text":"Brain-derived neurotrophic factor (BDNF) activates TrkB receptors at hippocampal synapses, triggering downstream MAPK/ERK signalling that enhances long-term potentiation (LTP). In a randomised controlled experiment with 240 adult rats, bilateral infusion of a TrkB antagonist completely abolished LTP in CA1 and impaired spatial memory acquisition in the Morris water maze (p < 0.001)."},{"id":"e_p02","claim":"A meta-analysis of 34 studies (total n = 8,412 participants) found that aerobic exercise consistently elevated serum BDNF levels by an average of 18 % (95 % CI: 14\u201322 %) and was associated with improved episodic memory scores across age groups.","source":"Neuroscience & Biobehavioral Reviews","evidence_type":"META_ANALYSIS","year":2023,"sample_n":8412,"epistemic_quality":0.8775,"score":{"source_authority":0.8,"methodological_strength":1.0,"directness":0.9,"specificity":0.85,"sample_adequacy":0.9812,"independence":0.894,"consistency":0.8,"replication_status":0.75,"recency":0.7},"weights":{"source_authority":0.1,"methodological_strength":0.2,"directness":0.15,"specificity":0.1,"sample_adequacy":0.1,"independence":0.1,"consistency":0.1,"replication_status":0.1,"recency":0.05},"node_ids":["episodic_memory","aerobic_exercise","hippocampus","BDNF"],"passage_text":"A meta-analysis of 34 studies (total n = 8,412 participants) found that aerobic exercise consistently elevated serum BDNF levels by an average of 18 % (95 % CI: 14\u201322 %) and was associated with improved episodic memory scores across age groups. Effect sizes were larger in studies lasting \u2265 12 weeks."},{"id":"e_p03","claim":"A cross-sectional survey of 120 elderly volunteers found a weak positive correlation (r = 0.21, p = 0.04) between self-reported physical activity and plasma BDNF.","source":"Frontiers in Aging Neuroscience","evidence_type":"CROSS_SECTIONAL","year":2019,"sample_n":120,"epistemic_quality":0.5808,"score":{"source_authority":0.6,"methodological_strength":0.3333,"directness":0.6,"specificity":0.85,"sample_adequacy":0.5198,"independence":0.872,"consistency":0.8,"replication_status":0.45,"recency":0.3},"weights":{"source_authority":0.1,"methodological_strength":0.2,"directness":0.15,"specificity":0.1,"sample_adequacy":0.1,"independence":0.1,"consistency":0.1,"replication_status":0.1,"recency":0.05},"node_ids":["aerobic_exercise","hippocampus","BDNF"],"passage_text":"A cross-sectional survey of 120 elderly volunteers found a weak positive correlation (r = 0.21, p = 0.04) between self-reported physical activity and plasma BDNF. The study relied on questionnaire data and did not measure LTP or hippocampal volume directly."},{"id":"e_p04","claim":"Editorial commentary: It is widely believed that BDNF plays a central role in synaptic plasticity and memory.","source":"Trends in Neurosciences (editorial)","evidence_type":"SECONDARY_COMMENTARY","year":2021,"sample_n":null,"epistemic_quality":0.3936,"score":{"source_authority":0.3,"methodological_strength":0.0,"directness":0.6,"specificity":0.55,"sample_adequacy":0.0,"independence":0.936,"consistency":0.55,"replication_status":0.45,"recency":0.5},"weights":{"source_authority":0.1,"methodological_strength":0.2,"directness":0.15,"specificity":0.1,"sample_adequacy":0.1,"independence":0.1,"consistency":0.1,"replication_status":0.1,"recency":0.05},"node_ids":["synaptic_plasticity","cognitive_decline","BDNF"],"passage_text":"Editorial commentary: It is widely believed that BDNF plays a central role in synaptic plasticity and memory. Several researchers have proposed that targeting BDNF pathways could be therapeutic for cognitive decline, though clinical translation remains challenging."},{"id":"e_p05","claim":"Midbrain dopamine neurons in the ventral tegmental area (VTA) encode reward prediction errors (RPE): they fire above baseline when reward exceeds expectation and are suppressed when expected reward is omitted.","source":"Science","evidence_type":"CONTROLLED_EXPERIMENT","year":2021,"sample_n":18,"epistemic_quality":0.7622,"score":{"source_authority":1.0,"methodological_strength":0.8333,"directness":0.9,"specificity":0.55,"sample_adequacy":0.3138,"independence":0.942,"consistency":0.8,"replication_status":0.75,"recency":0.5},"weights":{"source_authority":0.1,"methodological_strength":0.2,"directness":0.15,"specificity":0.1,"sample_adequacy":0.1,"independence":0.1,"consistency":0.1,"replication_status":0.1,"recency":0.05},"node_ids":["decision_making","reward_prediction_error","VTA","dopamine"],"passage_text":"Midbrain dopamine neurons in the ventral tegmental area (VTA) encode reward prediction errors (RPE): they fire above baseline when reward exceeds expectation and are suppressed when expected reward is omitted. Single-unit recordings in 18 macaques across 6,000 trials replicated the RPE signal with high fidelity (R\u00b2 = 0.91)."},{"id":"e_p06","claim":"Longitudinal fMRI study of 95 healthy adults over 18 months showed that striatal dopamine release (indexed via [11C]raclopride PET) predicted individual differences in reinforcement learning rate (\u03b2 = 0.43, p < 0.001) and real-world financial decision quality.","source":"Neuron","evidence_type":"LONGITUDINAL","year":2022,"sample_n":95,"epistemic_quality":0.6756,"score":{"source_authority":1.0,"methodological_strength":0.5,"directness":0.6,"specificity":0.85,"sample_adequacy":0.4944,"independence":0.962,"consistency":0.8,"replication_status":0.45,"recency":0.6},"weights":{"source_authority":0.1,"methodological_strength":0.2,"directness":0.15,"specificity":0.1,"sample_adequacy":0.1,"independence":0.1,"consistency":0.1,"replication_status":0.1,"recency":0.05},"node_ids":["striatum","decision_making","reinforcement_learning","dopamine"],"passage_text":"Longitudinal fMRI study of 95 healthy adults over 18 months showed that striatal dopamine release (indexed via [11C]raclopride PET) predicted individual differences in reinforcement learning rate (\u03b2 = 0.43, p < 0.001) and real-world financial decision quality."},{"id":"e_p07","claim":"A case report describes a patient with a focal VTA lesion who showed complete insensitivity to monetary rewards on a gambling task.","source":"Neuropsychologia","evidence_type":"CASE_REPORT","year":2020,"sample_n":1,"epistemic_quality":0.4775,"score":{"source_authority":0.6,"methodological_strength":0.1667,"directness":0.6,"specificity":0.55,"sample_adequacy":0.0,"independence":0.942,"consistency":0.8,"replication_status":0.45,"recency":0.4},"weights":{"source_authority":0.1,"methodological_strength":0.2,"directness":0.15,"specificity":0.1,"sample_adequacy":0.1,"independence":0.1,"consistency":0.1,"replication_status":0.1,"recency":0.05},"node_ids":["decision_making","reward_prediction_error","VTA","dopamine"],"passage_text":"A case report describes a patient with a focal VTA lesion who showed complete insensitivity to monetary rewards on a gambling task. Neuropsychological testing confirmed intact general cognition. The authors conclude dopamine is necessary for reward-based choice."},{"id":"e_p08","claim":"Single-cell RNA sequencing of post-mortem human cortex (n = 48 donors, 24 Alzheimer's / 24 controls) identified a disease-associated microglia (DAM) subtype upregulating TREM2 and downregulating homeostatic genes.","source":"Cell","evidence_type":"OBSERVATIONAL","year":2023,"sample_n":48,"epistemic_quality":0.72,"score":{"source_authority":1.0,"methodological_strength":0.6667,"directness":0.9,"specificity":0.55,"sample_adequacy":0.4203,"independence":0.946,"consistency":0.8,"replication_status":0.45,"recency":0.7},"weights":{"source_authority":0.1,"methodological_strength":0.2,"directness":0.15,"specificity":0.1,"sample_adequacy":0.1,"independence":0.1,"consistency":0.1,"replication_status":0.1,"recency":0.05},"node_ids":["TREM2","amyloid","neuroinflammation","microglia","Alzheimers_disease"],"passage_text":"Single-cell RNA sequencing of post-mortem human cortex (n = 48 donors, 24 Alzheimer's / 24 controls) identified a disease-associated microglia (DAM) subtype upregulating TREM2 and downregulating homeostatic genes. DAM density correlated with amyloid plaque load (Spearman \u03c1 = 0.74)."},{"id":"e_p09","claim":"In a transgenic mouse model of Alzheimer's disease (5xFAD, n = 60 mice), pharmacological depletion of microglia via CSF1R inhibitor PLX5622 reduced amyloid plaque burden by 35 % at 6 months but did not improve spatial memory in the Barnes maze.","source":"Journal of Neuroinflammation","evidence_type":"CONTROLLED_EXPERIMENT","year":2022,"sample_n":60,"epistemic_quality":0.7707,"score":{"source_authority":0.6,"methodological_strength":0.8333,"directness":0.9,"specificity":0.85,"sample_adequacy":0.4445,"independence":0.946,"consistency":0.8,"replication_status":0.75,"recency":0.6},"weights":{"source_authority":0.1,"methodological_strength":0.2,"directness":0.15,"specificity":0.1,"sample_adequacy":0.1,"independence":0.1,"consistency":0.1,"replication_status":0.1,"recency":0.05},"node_ids":["amyloid","neuroinflammation","microglia","Alzheimers_disease","spatial_memory"],"passage_text":"In a transgenic mouse model of Alzheimer's disease (5xFAD, n = 60 mice), pharmacological depletion of microglia via CSF1R inhibitor PLX5622 reduced amyloid plaque burden by 35 % at 6 months but did not improve spatial memory in the Barnes maze. This suggests microglial removal has plaque-clearing but not cognitive benefits."},{"id":"e_p10","claim":"A secondary analysis of data from the ADNI cohort (n = 312) found that elevated CSF levels of sTREM2, a microglial activation marker, were associated with slower cognitive decline over 3 years in early-stage Alzheimer's, suggesting a neuroprotective phase of microglial activation.","source":"Alzheimer's & Dementia","evidence_type":"OBSERVATIONAL","year":2023,"sample_n":312,"epistemic_quality":0.7499,"score":{"source_authority":0.8,"methodological_strength":0.6667,"directness":0.9,"specificity":0.85,"sample_adequacy":0.6235,"independence":0.942,"consistency":0.8,"replication_status":0.45,"recency":0.7},"weights":{"source_authority":0.1,"methodological_strength":0.2,"directness":0.15,"specificity":0.1,"sample_adequacy":0.1,"independence":0.1,"consistency":0.1,"replication_status":0.1,"recency":0.05},"node_ids":["Alzheimers_disease","microglia","cognitive_decline","TREM2"],"passage_text":"A secondary analysis of data from the ADNI cohort (n = 312) found that elevated CSF levels of sTREM2, a microglial activation marker, were associated with slower cognitive decline over 3 years in early-stage Alzheimer's, suggesting a neuroprotective phase of microglial activation."},{"id":"e_p11","claim":"Sharp-wave ripples (SWRs) recorded from hippocampal CA1 in sleeping rats (n = 30) co-occurred with cortical slow oscillations and spindles in 78 % of events, consistent with the active systems consolidation hypothesis.","source":"Nature","evidence_type":"CONTROLLED_EXPERIMENT","year":2023,"sample_n":30,"epistemic_quality":0.7759,"score":{"source_authority":1.0,"methodological_strength":0.8333,"directness":0.9,"specificity":0.55,"sample_adequacy":0.3693,"independence":0.923,"consistency":0.8,"replication_status":0.75,"recency":0.7},"weights":{"source_authority":0.1,"methodological_strength":0.2,"directness":0.15,"specificity":0.1,"sample_adequacy":0.1,"independence":0.1,"consistency":0.1,"replication_status":0.1,"recency":0.05},"node_ids":["sleep","sharp_wave_ripples","hippocampus","memory_consolidation"],"passage_text":"Sharp-wave ripples (SWRs) recorded from hippocampal CA1 in sleeping rats (n = 30) co-occurred with cortical slow oscillations and spindles in 78 % of events, consistent with the active systems consolidation hypothesis. Optogenetic disruption of SWRs during slow-wave sleep impaired novel object recognition 24 h later (p < 0.001)."},{"id":"e_p12","claim":"Polysomnographic study of 200 university students found that total slow-wave sleep duration positively predicted next-day declarative memory retention (r = 0.38, p < 0.001), while REM sleep predicted procedural memory.","source":"Sleep","evidence_type":"OBSERVATIONAL","year":2022,"sample_n":385,"epistemic_quality":0.7453,"score":{"source_authority":0.8,"methodological_strength":0.6667,"directness":0.9,"specificity":0.85,"sample_adequacy":0.6464,"independence":0.923,"consistency":0.8,"replication_status":0.45,"recency":0.6},"weights":{"source_authority":0.1,"methodological_strength":0.2,"directness":0.15,"specificity":0.1,"sample_adequacy":0.1,"independence":0.1,"consistency":0.1,"replication_status":0.1,"recency":0.05},"node_ids":["sleep","hippocampus","memory_consolidation","declarative_memory"],"passage_text":"Polysomnographic study of 200 university students found that total slow-wave sleep duration positively predicted next-day declarative memory retention (r = 0.38, p < 0.001), while REM sleep predicted procedural memory. Both findings were replicated in an independent cohort of 185 participants."},{"id":"e_p13","claim":"It has long been thought that sleep is important for memory.","source":"Scientific American (blog post)","evidence_type":"SECONDARY_COMMENTARY","year":2020,"sample_n":null,"epistemic_quality":0.3873,"score":{"source_authority":0.3,"methodological_strength":0.0,"directness":0.6,"specificity":0.55,"sample_adequacy":0.0,"independence":0.923,"consistency":0.55,"replication_status":0.45,"recency":0.4},"weights":{"source_authority":0.1,"methodological_strength":0.2,"directness":0.15,"specificity":0.1,"sample_adequacy":0.1,"independence":0.1,"consistency":0.1,"replication_status":0.1,"recency":0.05},"node_ids":["sleep","memory_consolidation"],"passage_text":"It has long been thought that sleep is important for memory. Popular science accounts often claim that a full 8 hours is necessary for optimal brain function, though the scientific evidence for a specific duration threshold is less clear than commonly portrayed."},{"id":"e_p14","claim":"A pre-registered randomised trial (n = 180 older adults, 12-week aerobic training vs.","source":"JAMA Neurology","evidence_type":"CONTROLLED_EXPERIMENT","year":2024,"sample_n":180,"epistemic_quality":0.784,"score":{"source_authority":1.0,"methodological_strength":0.8333,"directness":0.9,"specificity":0.85,"sample_adequacy":0.5638,"independence":0.91,"consistency":0.35,"replication_status":0.75,"recency":0.8},"weights":{"source_authority":0.1,"methodological_strength":0.2,"directness":0.15,"specificity":0.1,"sample_adequacy":0.1,"independence":0.1,"consistency":0.1,"replication_status":0.1,"recency":0.05},"node_ids":["episodic_memory","aerobic_exercise","BDNF"],"passage_text":"A pre-registered randomised trial (n = 180 older adults, 12-week aerobic training vs. stretching control) found no significant difference in serum BDNF between groups (p = 0.41) and no correlation between BDNF change and memory performance. Authors note possible ceiling effects in healthy older adults."}],"meta":{"nodes":24,"edges":14,"avg_epistemic_quality":0.68,"evidence_types":["CASE_REPORT","CONTROLLED_EXPERIMENT","CROSS_SECTIONAL","LONGITUDINAL","META_ANALYSIS","OBSERVATIONAL","SECONDARY_COMMENTARY"]}}
+
+
+// ─── Config ────────────────────────────────────────────────────────────────
+const ETYPE_COLOR = {
+  META_ANALYSIS:         '#4ade80',
+  CONTROLLED_EXPERIMENT: '#38bdf8',
+  OBSERVATIONAL:         '#a78bfa',
+  LONGITUDINAL:          '#fb923c',
+  CROSS_SECTIONAL:       '#fbbf24',
+  CASE_REPORT:           '#f87171',
+  SECONDARY_COMMENTARY:  '#64748b',
+};
+const ETYPE_LABEL = {
+  META_ANALYSIS:         'Meta-analysis',
+  CONTROLLED_EXPERIMENT: 'Controlled experiment',
+  OBSERVATIONAL:         'Observational',
+  LONGITUDINAL:          'Longitudinal',
+  CROSS_SECTIONAL:       'Cross-sectional',
+  CASE_REPORT:           'Case report',
+  SECONDARY_COMMENTARY:  'Secondary commentary',
+};
+const NTYPE_COLOR = {
+  protein: '#38bdf8', brain_region: '#a78bfa', process: '#4ade80',
+  behaviour: '#fb923c', intervention: '#fbbf24', neurotransmitter: '#e879f9',
+  disease: '#f87171', cell_type: '#2dd4bf', concept: '#94a3b8',
+};
+const DIM_LABELS = {
+  source_authority: 'Source authority', methodological_strength: 'Methodological strength',
+  directness: 'Directness', specificity: 'Specificity', sample_adequacy: 'Sample adequacy',
+  independence: 'Independence', consistency: 'Consistency', replication_status: 'Replication',
+  recency: 'Recency',
+};
+
+// ─── State ─────────────────────────────────────────────────────────────────
+let alpha = 0.6, gateMin = 0;
+let activeEtypes = new Set(Object.keys(ETYPE_COLOR));
+let selectedEdge = null;
+let simulation, svgEl, gMain;
+
+// ─── Left sidebar setup ────────────────────────────────────────────────────
+function buildLegends() {
+  const etypeLeg = document.getElementById('etype-legend');
+  Object.entries(ETYPE_COLOR).forEach(([k, c]) => {
+    const item = document.createElement('div');
+    item.className = 'legend-item';
+    item.dataset.etype = k;
+    item.innerHTML = `<div class="legend-dot" style="background:${c}"></div><span>${ETYPE_LABEL[k]}</span>`;
+    item.addEventListener('click', () => toggleEtype(k, item));
+    etypeLeg.appendChild(item);
+  });
+
+  const ntypeLeg = document.getElementById('ntype-legend');
+  Object.entries(NTYPE_COLOR).filter(([k]) => k !== 'concept').forEach(([k, c]) => {
+    const item = document.createElement('div');
+    item.className = 'ntype-item';
+    item.innerHTML = `<div class="ntype-dot" style="background:${c}"></div><span>${k.replace('_',' ')}</span>`;
+    ntypeLeg.appendChild(item);
+  });
+
+  const chips = document.getElementById('stats-chips');
+  chips.innerHTML = `
+    <div class="chip">nodes <span>${DATA.nodes.length}</span></div>
+    <div class="chip">edges <span>${DATA.edges.length}</span></div>
+    <div class="chip">avg ep <span>${DATA.meta.avg_epistemic_quality}</span></div>
+  `;
+}
+
+function toggleEtype(k, item) {
+  if (activeEtypes.has(k)) { activeEtypes.delete(k); item.classList.add('muted'); }
+  else { activeEtypes.add(k); item.classList.remove('muted'); }
+  updateVisibility();
+}
+
+// ─── D3 graph ──────────────────────────────────────────────────────────────
+function initGraph() {
+  const wrap = document.getElementById('canvas-wrap');
+  const W = wrap.clientWidth, H = wrap.clientHeight;
+
+  svgEl = d3.select('#graph-svg').attr('viewBox', `0 0 ${W} ${H}`);
+  const defs = svgEl.append('defs');
+
+  // zoom
+  const zoom = d3.zoom().scaleExtent([0.2, 4]).on('zoom', e => gMain.attr('transform', e.transform));
+  svgEl.call(zoom);
+  document.getElementById('btn-reset').onclick = () => svgEl.transition().duration(400).call(zoom.transform, d3.zoomIdentity);
+
+  gMain = svgEl.append('g');
+
+  // Build sim nodes: entity nodes + hyperedge nodes (bipartite)
+  const simNodes = [
+    ...DATA.nodes.map(n => ({ ...n, kind: 'entity' })),
+    ...DATA.edges.map(e => ({ id: e.id, kind: 'hedge', edge: e })),
+  ];
+  const nodeMap = Object.fromEntries(simNodes.map(n => [n.id, n]));
+
+  // Links: each hedge links to each of its entity nodes
+  const simLinks = [];
+  DATA.edges.forEach(e => {
+    e.node_ids.forEach(nid => {
+      simLinks.push({ source: e.id, target: nid, edgeId: e.id });
+    });
+  });
+
+  simulation = d3.forceSimulation(simNodes)
+    .force('link', d3.forceLink(simLinks).id(d => d.id).distance(70).strength(0.6))
+    .force('charge', d3.forceManyBody().strength(-180))
+    .force('center', d3.forceCenter(W / 2, H / 2))
+    .force('collide', d3.forceCollide(22))
+    .alphaDecay(0.03);
+
+  document.getElementById('btn-reheat').onclick = () => simulation.alpha(0.5).restart();
+
+  // Draw links
+  const linkG = gMain.append('g').attr('class', 'links');
+  const link = linkG.selectAll('line').data(simLinks).join('line')
+    .attr('stroke', d => {
+      const e = DATA.edges.find(x => x.id === d.edgeId);
+      return e ? ETYPE_COLOR[e.evidence_type] : '#334155';
+    })
+    .attr('stroke-width', 1)
+    .attr('stroke-opacity', 0.25);
+
+  // Draw hyperedge nodes (squares)
+  const hedgeG = gMain.append('g').attr('class', 'hedges');
+  const hedges = hedgeG.selectAll('g').data(simNodes.filter(n => n.kind === 'hedge'))
+    .join('g').attr('class', 'hedge-node').style('cursor', 'pointer');
+
+  hedges.append('rect')
+    .attr('width', 18).attr('height', 18)
+    .attr('x', -9).attr('y', -9)
+    .attr('rx', 3)
+    .attr('fill', d => {
+      const eq = d.edge.epistemic_quality;
+      return eqColor(eq);
+    })
+    .attr('stroke', d => ETYPE_COLOR[d.edge.evidence_type])
+    .attr('stroke-width', 1.5)
+    .attr('fill-opacity', d => {
+      const ep = d.edge.epistemic_quality;
+      return 0.3 + ep * 0.5;
+    });
+
+  hedges.append('text')
+    .attr('class', 'edge-label').attr('dy', 26)
+    .text(d => d.edge.id.replace('e_',''));
+
+  hedges.on('click', (ev, d) => selectEdge(d.edge))
+    .on('mouseover', (ev, d) => showTooltip(ev, `${d.edge.id}\nEp: ${d.edge.epistemic_quality.toFixed(3)}\n${ETYPE_LABEL[d.edge.evidence_type]}`))
+    .on('mousemove', moveTooltip)
+    .on('mouseout', hideTooltip)
+    .call(d3.drag()
+      .on('start', (ev, d) => { if (!ev.active) simulation.alphaTarget(0.3).restart(); d.fx=d.x; d.fy=d.y; })
+      .on('drag',  (ev, d) => { d.fx=ev.x; d.fy=ev.y; })
+      .on('end',   (ev, d) => { if (!ev.active) simulation.alphaTarget(0); d.fx=null; d.fy=null; })
+    );
+
+  // Draw entity nodes (circles)
+  const entityG = gMain.append('g').attr('class', 'entities');
+  const entities = entityG.selectAll('g').data(simNodes.filter(n => n.kind === 'entity'))
+    .join('g').attr('class', 'node-entity');
+
+  entities.append('circle')
+    .attr('r', d => 5 + d.degree * 2)
+    .attr('fill', d => NTYPE_COLOR[d.node_type] || NTYPE_COLOR.concept)
+    .attr('fill-opacity', 0.85)
+    .attr('stroke', d => NTYPE_COLOR[d.node_type] || NTYPE_COLOR.concept)
+    .attr('stroke-width', 0.5)
+    .attr('stroke-opacity', 0.4);
+
+  entities.append('text').attr('dy', d => 10 + d.degree * 2).text(d => d.label);
+
+  entities.on('mouseover', (ev, d) => showTooltip(ev, `${d.label}\n${d.node_type} · degree ${d.degree}`))
+    .on('mousemove', moveTooltip)
+    .on('mouseout', hideTooltip)
+    .call(d3.drag()
+      .on('start', (ev, d) => { if (!ev.active) simulation.alphaTarget(0.3).restart(); d.fx=d.x; d.fy=d.y; })
+      .on('drag',  (ev, d) => { d.fx=ev.x; d.fy=ev.y; })
+      .on('end',   (ev, d) => { if (!ev.active) simulation.alphaTarget(0); d.fx=null; d.fy=null; })
+    );
+
+  simulation.on('tick', () => {
+    link.attr('x1', d => d.source.x).attr('y1', d => d.source.y)
+        .attr('x2', d => d.target.x).attr('y2', d => d.target.y);
+    hedges.attr('transform', d => `translate(${d.x},${d.y})`);
+    entities.attr('transform', d => `translate(${d.x},${d.y})`);
+  });
+
+  // Store refs for updates
+  svgEl._hedges = hedges;
+  svgEl._links = link;
+}
+
+function eqColor(eq) {
+  if (eq >= 0.75) return '#4ade80';
+  if (eq >= 0.60) return '#fbbf24';
+  return '#f87171';
+}
+
+function updateVisibility() {
+  if (!svgEl) return;
+  svgEl._hedges.style('opacity', d => {
+    const e = d.edge;
+    if (!activeEtypes.has(e.evidence_type)) return 0.08;
+    if (e.epistemic_quality < gateMin) return 0.08;
+    return 1;
+  });
+  svgEl._links.attr('stroke-opacity', d => {
+    const e = DATA.edges.find(x => x.id === d.edgeId);
+    if (!e) return 0.08;
+    if (!activeEtypes.has(e.evidence_type)) return 0.03;
+    if (e.epistemic_quality < gateMin) return 0.03;
+    return 0.25;
+  });
+}
+
+// ─── Right panel ──────────────────────────────────────────────────────────
+function selectEdge(edge) {
+  selectedEdge = edge;
+  document.getElementById('empty-state').style.display = 'none';
+  document.getElementById('sidebar-right').classList.remove('collapsed');
+
+  document.getElementById('panel-claim').textContent = edge.claim;
+  document.getElementById('p-source').textContent = edge.source;
+  document.getElementById('p-year').textContent = edge.year;
+  document.getElementById('p-n').textContent = edge.sample_n != null ? edge.sample_n.toLocaleString() : '—';
+  document.getElementById('p-text').textContent = edge.passage_text;
+
+  const etBadge = document.getElementById('p-etype');
+  const c = ETYPE_COLOR[edge.evidence_type];
+  etBadge.innerHTML = `<span class="etype-badge" style="background:${c}22;color:${c};border:1px solid ${c}44">${ETYPE_LABEL[edge.evidence_type]}</span>`;
+
+  const eq = edge.epistemic_quality;
+  const agg = document.getElementById('p-aggregate');
+  agg.textContent = eq.toFixed(3);
+  agg.style.color = eqColor(eq);
+
+  const ql = document.getElementById('p-quality-label');
+  ql.textContent = eq >= 0.75 ? 'Strong evidence' : eq >= 0.60 ? 'Moderate evidence' : eq >= 0.45 ? 'Weak evidence' : 'Very weak evidence';
+  ql.style.color = eqColor(eq);
+
+  // dimension bars
+  const bars = document.getElementById('dim-bars');
+  bars.innerHTML = '';
+  Object.entries(edge.score).forEach(([dim, val]) => {
+    const w = edge.weights[dim];
+    const contrib = val * w;
+    const color = val >= 0.7 ? '#4ade80' : val >= 0.5 ? '#fbbf24' : '#f87171';
+    const row = document.createElement('div');
+    row.className = 'dim-row';
+    row.innerHTML = `
+      <div class="dim-header">
+        <span class="dim-name">${DIM_LABELS[dim]}</span>
+        <span class="dim-num" style="color:${color}">${val.toFixed(2)} <span style="color:var(--text3);font-size:10px">(w=${w})</span></span>
+      </div>
+      <div class="dim-bar-track">
+        <div class="dim-bar-fill" style="width:${val*100}%;background:${color}"></div>
+      </div>`;
+    bars.appendChild(row);
+  });
+
+  // nodes chips
+  const nodeChips = document.getElementById('p-nodes');
+  nodeChips.innerHTML = edge.node_ids.map(nid => {
+    const n = DATA.nodes.find(x => x.id === nid);
+    const c = n ? (NTYPE_COLOR[n.node_type] || '#94a3b8') : '#94a3b8';
+    return `<span class="node-chip" style="border-color:${c}44;color:${c}">${n ? n.label : nid}</span>`;
+  }).join('');
+
+  // highlight in graph
+  svgEl._hedges.select('rect')
+    .attr('stroke-width', d => d.edge.id === edge.id ? 3 : 1.5)
+    .attr('stroke-opacity', d => d.edge.id === edge.id ? 1 : 0.8);
+}
+
+document.getElementById('close-panel').onclick = () => {
+  document.getElementById('sidebar-right').classList.add('collapsed');
+  document.getElementById('empty-state').style.display = '';
+  selectedEdge = null;
+  if (svgEl) svgEl._hedges.select('rect').attr('stroke-width', 1.5).attr('stroke-opacity', 0.8);
+};
+
+// ─── Sliders ───────────────────────────────────────────────────────────────
+document.getElementById('alpha-slider').addEventListener('input', e => {
+  alpha = parseFloat(e.target.value);
+  document.getElementById('alpha-val').textContent = alpha.toFixed(2);
+});
+document.getElementById('gate-slider').addEventListener('input', e => {
+  gateMin = parseFloat(e.target.value);
+  document.getElementById('gate-val').textContent = gateMin > 0 ? `≥${gateMin.toFixed(2)}` : 'off';
+  updateVisibility();
+});
+
+// ─── Tooltip ───────────────────────────────────────────────────────────────
+const tooltip = document.getElementById('tooltip');
+function showTooltip(ev, text) {
+  tooltip.style.display = 'block';
+  tooltip.innerHTML = text.split('\n').map(l => `<div>${l}</div>`).join('');
+  moveTooltip(ev);
+}
+function moveTooltip(ev) {
+  tooltip.style.left = (ev.clientX + 14) + 'px';
+  tooltip.style.top  = (ev.clientY - 10) + 'px';
+}
+function hideTooltip() { tooltip.style.display = 'none'; }
+
+// ─── Boot ──────────────────────────────────────────────────────────────────
+buildLegends();
+initGraph();
+</script>
+</body>
+</html>
