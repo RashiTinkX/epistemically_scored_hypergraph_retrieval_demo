@@ -1,6 +1,5 @@
 """
 retrieval.py
-────────────
 Hyper-RAG retrieval engine — genuine hypergraph-driven retrieval.
 
 Based on: Feng et al. (2025) "Hyper-RAG: Combating LLM Hallucinations using
