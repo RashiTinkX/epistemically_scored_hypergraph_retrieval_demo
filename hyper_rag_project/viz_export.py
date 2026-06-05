@@ -1,6 +1,5 @@
 """
 viz_export.py
-─────────────
 Serialises a KnowledgeHypergraph + HyperRAGRetriever state to JSON
 consumed by the HTML/D3 visualisation (viz/index.html).
 
@@ -38,7 +37,7 @@ def export_viz_json(
     out_path = Path(path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
-    # ── Nodes ────────────────────────────────────────────────────────────────
+    # Nodes
     node_degree: dict[str, int] = {}
     for edge in hg.edges.values():
         for n in edge.nodes:
@@ -54,7 +53,7 @@ def export_viz_json(
         for n in hg.nodes.values()
     ]
 
-    # ── Edges ────────────────────────────────────────────────────────────────
+    # Edges
     edges_out = []
     for edge in hg.edges.values():
         passage  = edge.passages[0]
@@ -75,7 +74,7 @@ def export_viz_json(
             "passage_text":      passage.text,
         })
 
-    # ── Meta ─────────────────────────────────────────────────────────────────
+    # Meta
     stats = hg.stats()
     evidence_types = list({e["evidence_type"] for e in edges_out})
 
