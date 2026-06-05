@@ -40,7 +40,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from hypergraph import KnowledgeHypergraph, Hyperedge, EvidenceType
 
 
-# ─── Result type ─────────────────────────────────────────────────────────────
+# Result type
 
 @dataclass
 class RetrievalResult:
@@ -54,7 +54,7 @@ class RetrievalResult:
     rank: int = 0
 
 
-# ─── Retriever ────────────────────────────────────────────────────────────────
+# Retriever
 
 class HyperRAGRetriever:
     """
@@ -105,7 +105,7 @@ class HyperRAGRetriever:
         self._tfidf_matrix = None
         self._build_tfidf_index()
 
-    # ── TF-IDF index ─────────────────────────────────────────────────────────
+    # TF-IDF index
 
     def _edge_text(self, edge: Hyperedge) -> str:
         parts = [edge.claim]
@@ -125,7 +125,7 @@ class HyperRAGRetriever:
         self._tfidf_matrix = self._vectorizer.fit_transform(docs)
         self._edge_index   = {e.id: i for i, e in enumerate(self._edges)}
 
-    # ── Stage 1: Entity extraction ────────────────────────────────────────────
+    # Stage 1: Entity extraction
 
     def extract_query_entities(self, query: str) -> List[str]:
         """
@@ -159,7 +159,7 @@ class HyperRAGRetriever:
 
         return list(matched)
 
-    # ── Stage 2: Hypergraph traversal ─────────────────────────────────────────
+    # Stage 2: Hypergraph traversal
 
     def _edges_for_node(self, node_id: str) -> List[Hyperedge]:
         return [e for e in self._edges if any(n.id == node_id for n in e.nodes)]
@@ -190,7 +190,7 @@ class HyperRAGRetriever:
         if not query_entity_ids:
             return found
 
-        # ── Hop 0: seed edges — directly contain a query entity ──────────────
+        # Hop 0: seed edges — directly contain a query entity
         frontier_nodes: Set[str] = set(query_entity_ids)
         seed_edge_ids:  Set[str] = set()
 
@@ -203,7 +203,7 @@ class HyperRAGRetriever:
         if hops == 0:
             return found
 
-        # ── Hop 1: all nodes co-occurring in seed edges ───────────────────────
+        # Hop 1: all nodes co-occurring in seed edges
         # This is the key hypergraph advantage: one seed edge can span 5+ nodes,
         # so hop-1 expands much faster than in a binary graph.
         hop1_nodes: Set[str] = set()
@@ -221,7 +221,7 @@ class HyperRAGRetriever:
         if hops == 1:
             return found
 
-        # ── Hop 2: nodes co-occurring in hop-1 edges ─────────────────────────
+        # Hop 2: nodes co-occurring in hop-1 edges
         hop2_nodes: Set[str] = set()
         hop1_edge_ids = {eid for eid, path in found.items() if path == "1-hop"}
         for eid in hop1_edge_ids:
@@ -237,7 +237,7 @@ class HyperRAGRetriever:
 
         return found
 
-    # ── Stage 3: Scoring ──────────────────────────────────────────────────────
+    # Stage 3: Scoring
 
     def _entity_coverage(self, edge: Hyperedge, query_entity_ids: List[str]) -> float:
         """Fraction of query entities present in this hyperedge."""
@@ -253,7 +253,7 @@ class HyperRAGRetriever:
         idx   = self._edge_index[edge.id]
         return float(cosine_similarity(q_vec, self._tfidf_matrix[idx]).flatten()[0])
 
-    # ── Public retrieve interface ─────────────────────────────────────────────
+    # Public retrieve interface
 
     def retrieve(
         self,
