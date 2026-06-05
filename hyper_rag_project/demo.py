@@ -1,6 +1,5 @@
 """
 demo.py
-───────
 End-to-end Hyper-RAG demo for neuroscience knowledge hypergraph.
 
 Demonstrates the three-stage retrieval algorithm from Feng et al. (2025):
@@ -31,7 +30,7 @@ from hypergraph import EvidenceType
 console = Console(width=115)
 
 
-# ─── Display helpers ──────────────────────────────────────────────────────────
+# Display helpers
 
 ETYPE_LABEL = {
     EvidenceType.META_ANALYSIS:         "★★★ meta-analysis",
@@ -101,7 +100,7 @@ def result_table(results: list[RetrievalResult], title: str, show_path: bool = T
     return table
 
 
-# ─── Demo 1: Traversal trace ──────────────────────────────────────────────────
+# Demo 1: Traversal trace
 
 def demo_traversal_trace(retriever: HyperRAGRetriever):
     console.rule("[bold cyan]Demo 1 · Traversal trace — how the hypergraph is walked[/]")
@@ -146,7 +145,7 @@ def demo_traversal_trace(retriever: HyperRAGRetriever):
     console.print()
 
 
-# ─── Demo 2: Flat vs Hyper-RAG ───────────────────────────────────────────────
+# Demo 2: Flat vs Hyper-RAG
 
 def demo_flat_vs_hyperrag(retriever: HyperRAGRetriever):
     console.rule("[bold cyan]Demo 2 · Standard RAG vs Hyper-RAG[/]")
@@ -176,8 +175,7 @@ def demo_flat_vs_hyperrag(retriever: HyperRAGRetriever):
         console.print("  (no rank changes for this query)")
     console.print()
 
-
-# ─── Demo 3: High-order payoff ────────────────────────────────────────────────
+# Demo 3: High-order payoff 
 
 def demo_high_order(retriever: HyperRAGRetriever):
     console.rule("[bold cyan]Demo 3 · High-order traversal payoff[/]")
@@ -222,7 +220,7 @@ def demo_high_order(retriever: HyperRAGRetriever):
     console.print()
 
 
-# ─── Demo 4: Epistemic gate on traversal results ─────────────────────────────
+# Demo 4: Epistemic gate on traversal results 
 
 def demo_epistemic_gate(retriever: HyperRAGRetriever):
     console.rule("[bold cyan]Demo 4 · Epistemic quality gate on traversal results[/]")
@@ -247,7 +245,7 @@ def demo_epistemic_gate(retriever: HyperRAGRetriever):
     console.print()
 
 
-# ─── Main ─────────────────────────────────────────────────────────────────────
+# Main 
 
 def main():
     console.print("\n[bold white on blue]  Hyper-RAG Demo · Epistemically-Scored Knowledge Hypergraph  [/]\n")
