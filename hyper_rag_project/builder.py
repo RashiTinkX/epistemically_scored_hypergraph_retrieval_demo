@@ -1,6 +1,5 @@
 """
 builder.py
-──────────
 Constructs a KnowledgeHypergraph from a list of Passages.
 
 Each passage → one Hyperedge whose:
@@ -115,7 +114,7 @@ def build_hypergraph(passages: List[Passage]) -> KnowledgeHypergraph:
     """
     hg = KnowledgeHypergraph()
 
-    # ── 1. Create or retrieve nodes ──────────────────────────────────────────
+    # 1. Create or retrieve nodes
     node_registry: dict[str, Node] = {}
 
     def get_node(entity_id: str) -> Node:
@@ -127,7 +126,7 @@ def build_hypergraph(passages: List[Passage]) -> KnowledgeHypergraph:
             )
         return node_registry[entity_id]
 
-    # ── 2. Create one Hyperedge per Passage ──────────────────────────────────
+    # 2. Create one Hyperedge per Passage
     for passage in passages:
         nodes = frozenset(get_node(e) for e in passage.entities)
 
