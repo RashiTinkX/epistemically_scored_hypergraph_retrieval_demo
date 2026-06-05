@@ -1,6 +1,5 @@
 """
 main.py
-───────
 Single entry point for the Hyper-RAG pipeline.
 
 Usage:
@@ -49,18 +48,18 @@ def main():
                         help="Output path for viz JSON")
     args = parser.parse_args()
 
-    # ── Build pipeline ───────────────────────────────────────────────────────
+    # Build pipeline 
     print("\n[1/3] Building knowledge hypergraph from corpus…")
     hg    = build_hypergraph(PASSAGES)
     stats = hg.stats()
-    print(f"      ✓ {stats['nodes']} nodes  |  {stats['edges']} hyperedges  "
+    print(f" {stats['nodes']} nodes  |  {stats['edges']} hyperedges  "
           f"|  avg epistemic quality: {stats['avg_epistemic_quality']}")
 
     print("[2/3] Initialising Hyper-RAG retriever…")
     retriever = HyperRAGRetriever(hg, w_coverage=0.35, w_semantic=0.35, w_epistemic=0.30)
-    print(f"      ✓ TF-IDF index built  |  weights: cov=0.35  sem=0.35  ep=0.30")
+    print(f" TF-IDF index built  |  weights: cov=0.35  sem=0.35  ep=0.30")
 
-    # ── Dispatch ─────────────────────────────────────────────────────────────
+    # Dispatch 
     if args.query:
         print("[3/3] Running query…")
         run_query(retriever, args.query, top_k=args.top_k)
@@ -68,7 +67,7 @@ def main():
     elif args.viz_only:
         print("[3/3] Exporting visualisation JSON…")
         out_path = export_viz_json(hg, retriever, path=args.out)
-        print(f"      ✓ Written to {out_path}")
+        print(f" Written to {out_path}")
         print(f"\n  Open viz/index.html in your browser.\n")
 
     elif args.demo_only:
@@ -83,7 +82,7 @@ def main():
 
         print("\nExporting visualisation data…")
         out_path = export_viz_json(hg, retriever, path=args.out)
-        print(f"  ✓ Written to {out_path}")
+        print(f" Written to {out_path}")
         print(f"\n  Open viz/index.html in your browser.\n")
 
 
