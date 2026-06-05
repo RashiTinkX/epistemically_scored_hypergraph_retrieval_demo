@@ -1,4 +1,4 @@
-# Hyper-RAG · Epistemic Knowledge Hypergraph
+# Epistemic Knowledge Hypergraph
 
 A Python + interactive HTML implementation of hypergraph-driven retrieval-augmented
 generation with epistemic evidence scoring.
