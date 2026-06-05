@@ -16,7 +16,6 @@ import math
 
 
 # Evidence-type taxonomy
-
 class EvidenceType(Enum):
     """Ordered by methodological strength (higher = stronger)."""
     SECONDARY_COMMENTARY  = 1   # review without primary analysis, editorial
@@ -33,7 +32,6 @@ class EvidenceType(Enum):
 
 
 # Epistemic Score
-
 @dataclass
 class EpistemicScore:
     """
@@ -134,7 +132,6 @@ class EpistemicScore:
 
 
 # Passage (document chunk)
-
 @dataclass
 class Passage:
     id: str
@@ -146,8 +143,7 @@ class Passage:
     entities: List[str] = field(default_factory=list)   # pre-extracted
 
 
-# ─── Nodes and Hyperedges ─────────────────────────────────────────────────────
-
+# Nodes and Hyperedges
 @dataclass
 class Node:
     """A concept / entity in the hypergraph."""
@@ -183,7 +179,6 @@ class Hyperedge:
 
 
 # Hypergraph
-
 class KnowledgeHypergraph:
     """
     Container for nodes and hyperedges.
